@@ -19,15 +19,6 @@ async function loadYahooFinance() {
     const module = await Function("return import(arguments[0])")(moduleName);
     yahooFinance = module.default;
     
-    yahooFinance.setGlobalConfig({
-      queue: { concurrency: 4 }
-    });
-    console.log("✅ Institutional data engine initialized perfectly.");
-  } catch (err) {
-    console.error("❌ Critical error loading financial modules:", err);
-  }
-}
-
 // Initialize Finnhub Client safely
 const finnhub = require('finnhub');
 const finnhubApiClient = finnhub.ApiClient.instance;
