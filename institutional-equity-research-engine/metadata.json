@@ -1,0 +1,6 @@
+{
+  "name": "Institutional Equity Research Engine",
+  "description": "Professional institutional equity research platform with real market dashboards, stock analyzers, 12 performance matrices, and leveraged ETF look-through metrics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

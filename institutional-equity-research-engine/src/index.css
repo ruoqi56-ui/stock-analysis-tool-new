@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,650;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@355;400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* Editorial Palette overrides */
+  --color-slate-950: #0f1115; /* Base Dark Canvas */
+  --color-slate-900: #0a0c0e; /* Header / Focus Containers background */
+  --color-slate-850: rgba(255, 255, 255, 0.05); /* Soft border divider */
+  --color-slate-800: rgba(255, 255, 255, 0.1);  /* Solid border line */
+  
+  --color-slate-100: #e0e2e6; /* Elegant Primary Body Text */
+  --color-slate-200: #bfc2c7;
+  --color-slate-300: #a3a7af; /* Subtitles and secondary body text */
+  --color-slate-400: #858a93; /* Outlets and passive details */
+  
+  /* Primary highlights and Accent mapping (Orange updated to elegant Slate-Blue & Slate-Gray) */
+  --color-teal-300: #7dd3fc; /* Slate Blue Light */
+  --color-teal-400: #38bdf8; /* Slate Blue Medium */
+  --color-teal-500: #64748b; /* Steel Gray / Slate Highlight */
+  --color-teal-650: #475569; /* Dark Slate Gray */
+  --color-teal-950: rgba(100, 116, 139, 0.08); /* Transparent slate tint fill */
+
+  /* Success metrics mapping for premium high conviction signals (Mapped to radiant Green) */
+  --color-emerald-300: #6ee7b7;
+  --color-emerald-400: #34d399; /* Radiant true green for positive */
+  --color-emerald-500: #10b981; /* Regular emerald green */
+  --color-emerald-950: rgba(16, 185, 129, 0.08);
+
+  /* Warning / Bear Case signals (Red as requested) */
+  --color-rose-400: #ef4444; /* Red for negative */
+  --color-rose-500: #dc2626; /* Darker Red for negative text */
+  --color-rose-950: rgba(220, 38, 38, 0.06);
+
+  /* Typographic Scale assignments */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Playfair Display", Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Sharp print-press editorial geometry overrides */
+  --radius-lg: 0px; 
+  --radius-xl: 0px;
+  --radius-md: 0px;
+  --radius-sm: 0px;
+
+  /* Tight professional shadows */
+  --shadow-lg: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-xl: 0 0 0 1px rgba(255, 255, 255, 0.12);
+  --shadow-md: 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+/* Custom Editorial Adjustments & Print Layout Details */
+body {
+  font-family: var(--font-sans);
+  background-color: #0f1115 !important;
+  color: #e0e2e6 !important;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  letter-spacing: -0.011em;
+}
+
+/* Custom elegant scrollbar matching high-end reporting terminals */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #0f1115;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 0px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Editorial selection accent */
+::selection {
+  background-color: #38bdf8 !important;
+  color: #0a0c0e !important;
+}
+
+/* Typography styles to enhance editorial feel */
+h1, h2, h3 {
+  letter-spacing: -0.022em;
+}
+
+/* Add an elegant subtle border accent under primary title elements */
+.editorial-title-accent::after {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 1px;
+  background-color: #facc15; /* Elegant positive gold yellow line */
+  margin-top: 8px;
+}
