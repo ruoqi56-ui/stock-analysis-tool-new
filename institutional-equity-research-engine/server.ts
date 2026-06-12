@@ -3,10 +3,6 @@ import path from "path";
 import dotenv from "dotenv";
 import { createServer as createViteServer } from "vite";
 
-// Using require to completely bypass the bundle export error
-const yahooFinance = require("yahoo-finance2").default;
-const finnhub = require('finnhub');
-
 dotenv.config();
 
 const app = express();
@@ -14,15 +10,31 @@ const PORT = 3000;
 
 app.use(express.json());
 
-// Initialize Finnhub Client safely
+// Declare a global placeholder variable for Yahoo Finance
+let yahooFinance: any;
+
+// Use a dynamic import block to pull the ESM package safely at runtime
+async function loadYahooFinance() {
+  try {
+    const module = await import("yahoo-finance2");
+    yahooFinance = module.default;
+    
+    // Configure queue concurrency once loaded
+    yahooFinance.setGlobalConfig({
+      queue: { concurrency: 4 }
+    });
+    console.log("Yahoo Finance loaded successfully.");
+  } catch (err) {
+    console.error("Failed to dynamically load yahoo-finance2:", err);
+  }
+}
+
+// Initialize Finnhub Client safely (standard library format)
+const finnhub = require('finnhub');
 const finnhubApiClient = finnhub.ApiClient.instance;
 const api_key = finnhubApiClient.authentications['api_key'];
 api_key.apiKey = process.env.FINNHUB_API_KEY; 
 const finnhubClient = new finnhub.DefaultApi();
-
-yahooFinance.setGlobalConfig({
-  queue: { concurrency: 4 }
-});
 
 const getFinnhubQuote = (symbol: string): Promise<any> => {
   return new Promise((resolve, reject) => {
@@ -48,6 +60,7 @@ const getFinnhubRecommendations = (symbol: string): Promise<any[]> => {
 app.post("/api/analyze-stock", async (req, res) => {
   const { ticker } = req.body;
   if (!ticker) return res.status(400).json({ error: "Stock ticker is required." });
+  if (!yahooFinance) return res.status(500).json({ error: "Market data engine initializing. Try again in a moment." });
 
   const normTicker = ticker.toUpperCase().trim();
 
@@ -126,6 +139,7 @@ app.post("/api/analyze-stock", async (req, res) => {
 // API Route: Market Summary
 // -------------------------------------------------------------
 app.get("/api/market-summary", async (req, res) => {
+  if (!yahooFinance) return res.status(500).json({ error: "Market data engine initializing." });
   try {
     const symbols = ["^GSPC", "^IXIC", "^DJI"];
     const quotes = await yahooFinance.quote(symbols);
@@ -142,8 +156,12 @@ app.get("/api/market-summary", async (req, res) => {
   }
 });
 
-// Vite and Static Assets
+// Bootstrap application sequentially
 async function bootstrap() {
+  // 1. Resolve ESM Module path directly at runtime
+  await loadYahooFinance();
+
+  // 2. Set up environments
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({ server: { middlewareMode: true }, appType: "spa" });
     app.use(vite.middlewares);
@@ -152,6 +170,7 @@ async function bootstrap() {
     app.use(express.static(distPath));
     app.get("*", (req, res) => { res.sendFile(path.join(distPath, "index.html")); });
   }
+  
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Dual-Data-Engine listening on port ${PORT}`);
   });
