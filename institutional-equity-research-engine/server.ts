@@ -2,7 +2,7 @@ import express from "express";
 import path from "path";
 import dotenv from "dotenv";
 import { createServer as createViteServer } from "vite";
-import yahooFinance from "yahoo-finance2";
+import { default as yahooFinance } from "yahoo-finance2";
 const finnhub = require('finnhub');
 
 dotenv.config();
