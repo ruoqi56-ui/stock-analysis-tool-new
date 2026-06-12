@@ -2,7 +2,9 @@ import express from "express";
 import path from "path";
 import dotenv from "dotenv";
 import { createServer as createViteServer } from "vite";
-import { default as yahooFinance } from "yahoo-finance2";
+
+// Using require to completely bypass the bundle export error
+const yahooFinance = require("yahoo-finance2").default;
 const finnhub = require('finnhub');
 
 dotenv.config();
@@ -127,7 +129,7 @@ app.get("/api/market-summary", async (req, res) => {
   try {
     const symbols = ["^GSPC", "^IXIC", "^DJI"];
     const quotes = await yahooFinance.quote(symbols);
-    const majorIndices = quotes.map(q => ({
+    const majorIndices = quotes.map((q: any) => ({
       name: q.shortName || q.symbol,
       symbol: q.symbol,
       price: q.regularMarketPrice || 0,
