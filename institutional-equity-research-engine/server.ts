@@ -10,26 +10,25 @@ const PORT = 3000;
 
 app.use(express.json());
 
-// Declare a global placeholder variable for Yahoo Finance
+// 🚀 THE PERMANENT FIX: Force Node to load the ESM module bypassing esbuild completely
 let yahooFinance: any;
-
-// Use a dynamic import block to pull the ESM package safely at runtime
 async function loadYahooFinance() {
   try {
-    const module = await import("yahoo-finance2");
+    // This exact syntax tricks esbuild into leaving the import completely alone
+    const moduleName = "yahoo-finance2";
+    const module = await Function("return import(arguments[0])")(moduleName);
     yahooFinance = module.default;
     
-    // Configure queue concurrency once loaded
     yahooFinance.setGlobalConfig({
       queue: { concurrency: 4 }
     });
-    console.log("Yahoo Finance loaded successfully.");
+    console.log("✅ Institutional data engine initialized perfectly.");
   } catch (err) {
-    console.error("Failed to dynamically load yahoo-finance2:", err);
+    console.error("❌ Critical error loading financial modules:", err);
   }
 }
 
-// Initialize Finnhub Client safely (standard library format)
+// Initialize Finnhub Client safely
 const finnhub = require('finnhub');
 const finnhubApiClient = finnhub.ApiClient.instance;
 const api_key = finnhubApiClient.authentications['api_key'];
@@ -158,10 +157,9 @@ app.get("/api/market-summary", async (req, res) => {
 
 // Bootstrap application sequentially
 async function bootstrap() {
-  // 1. Resolve ESM Module path directly at runtime
+  // Resolve ESM Module path directly at runtime avoiding bundle rewrites
   await loadYahooFinance();
 
-  // 2. Set up environments
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({ server: { middlewareMode: true }, appType: "spa" });
     app.use(vite.middlewares);
