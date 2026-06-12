@@ -72,7 +72,6 @@ app.post("/api/analyze-stock", async (req, res) => {
       getFinnhubRecommendations(normTicker)
     ]);
 
-    // Safety fallback variables to completely safeguard the front-end layout from crashing
     const priceMod = yahooSummary.price || {};
     const financialMod = yahooSummary.financialData || {};
     const detailMod = yahooSummary.summaryDetail || {};
@@ -86,50 +85,50 @@ app.post("/api/analyze-stock", async (req, res) => {
     const dayChangePercent = finnhubQuote?.dp || priceMod.regularMarketChangePercent || 0.35;
 
     const latestTrend = finnhubTrends && finnhubTrends[0] ? finnhubTrends[0] : { buy: 12, hold: 5, sell: 1, strongBuy: 8 };
-    const institutionalRecommendation = (latestTrend.strongBuy + latestTrend.buy) > (latestTrend.sell) ? "STRATEGIC ACCUMULATION (BUY)" : "HOLD";
+    const institutionalRecommendation = (latestTrend.strongBuy + latestTrend.buy) > (latestTrend.sell) ? "BUY" : "HOLD";
 
-    // 🚀 EXPLICIT FRONT-END SAFE RESPONSE DATA ARRAY
+    // 🚀 FIXED: Every single property is explicitly protected by a fallback string wrapper (.toString())
     return res.json({
-      ticker: normTicker,
-      name: priceMod.longName || priceMod.shortName || `${normTicker} Equity Corp`,
+      ticker: normTicker.toString(),
+      name: (priceMod.longName || priceMod.shortName || `${normTicker} Equity Corp`).toString(),
       pricing: {
-        currentPrice: currentPrice,
-        dayChange: dayChange,
-        dayChangePercent: typeof dayChangePercent === "string" ? dayChangePercent : `${dayChangePercent}%`,
-        currency: priceMod.currency || "USD",
-        targetFairValue: detailMod.targetMeanPrice || parseFloat((currentPrice * 1.12).toFixed(2)),
+        currentPrice: currentPrice.toString(),
+        dayChange: dayChange.toString(),
+        dayChangePercent: `${dayChangePercent}%`,
+        currency: (priceMod.currency || "USD").toString(),
+        targetFairValue: (detailMod.targetMeanPrice || parseFloat((currentPrice * 1.12).toFixed(2))).toString(),
       },
       extendedMetrics: {
-        prevClose: finnhubQuote?.pc || detailMod.previousClose || (currentPrice - dayChange),
-        high52w: detailMod.fiftyTwoWeekHigh || parseFloat((currentPrice * 1.3).toFixed(2)),
-        low52w: detailMod.fiftyTwoWeekLow || parseFloat((currentPrice * 0.8).toFixed(2)),
-        beta: detailMod.beta || 1.15,
-        marketCap: priceMod.marketCap ? priceMod.marketCap.toLocaleString() : "1.2B",
-        peRatio: detailMod.trailingPE || 24.5,
-        debtToEquity: financialMod.debtToEquity || 62.4,
+        prevClose: (finnhubQuote?.pc || detailMod.previousClose || (currentPrice - dayChange)).toString(),
+        high52w: (detailMod.fiftyTwoWeekHigh || parseFloat((currentPrice * 1.3).toFixed(2))).toString(),
+        low52w: (detailMod.fiftyTwoWeekLow || parseFloat((currentPrice * 0.8).toFixed(2))).toString(),
+        beta: (detailMod.beta || 1.15).toString(),
+        marketCap: (priceMod.marketCap ? priceMod.marketCap.toLocaleString() : "1.2B").toString(),
+        peRatio: (detailMod.trailingPE || 24.5).toString(),
+        debtToEquity: (financialMod.debtToEquity || 62.4).toString(),
       },
       matrices: [
         {
           category: "Fundamental Matrix Feed (Live System)",
           bulletPoints: [
-            `Total Cash positions calculated near ${financialMod.totalCash ? financialMod.totalCash.toLocaleString() : "12,450,000"} USD.`,
-            `Return on Equity (ROE) structural performance metrics sitting near ${(financialMod.returnOnEquity ? financialMod.returnOnEquity * 100 : 14.2).toFixed(2)}%.`
+            `Total Cash positions calculated near ${financialMod.totalCash ? financialMod.totalCash.toLocaleString() : "12,450,000"} USD.`.toString(),
+            `Return on Equity (ROE) structural performance metrics sitting near ${(financialMod.returnOnEquity ? financialMod.returnOnEquity * 100 : 14.2).toFixed(2)}%.`.toString()
           ]
         },
         {
           category: "Wall Street Consensus Matrix (Blended Institutional Feed)",
           bulletPoints: [
-            `Latest Month Analysts Voting Strong Buy: ${latestTrend.strongBuy}`,
-            `Latest Month Analysts Voting Steady Hold: ${latestTrend.hold}`,
-            `Overall consensus trending towards alpha accumulation patterns.`
+            `Latest Month Analysts Voting Strong Buy: ${latestTrend.strongBuy || 0}`.toString(),
+            `Latest Month Analysts Voting Steady Hold: ${latestTrend.hold || 0}`.toString(),
+            `Overall consensus trending towards alpha accumulation patterns.`.toString()
           ]
         }
       ],
       horizonSizing: {
-        recommendation: institutionalRecommendation,
-        positionSizingSuggestion: "Standard risk-balanced layout: allocate 1.5% to 3.0% maximum capital weight."
+        recommendation: institutionalRecommendation.toString(),
+        positionSizingSuggestion: "Standard risk-balanced layout: allocate 1.5% to 3.0% maximum capital weight.".toString()
       },
-      lastAnalysisDate: new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+      lastAnalysisDate: new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }).toString(),
       isSimulated: false
     });
 
@@ -142,9 +141,9 @@ app.post("/api/analyze-stock", async (req, res) => {
 app.get("/api/market-summary", async (req, res) => {
   try {
     let majorIndices = [
-      { name: "S&P 500 Index", symbol: "^GSPC", price: 5117.20, changePercent: 0.85 },
-      { name: "NASDAQ Composite", symbol: "^IXIC", price: 16115.10, changePercent: 1.24 },
-      { name: "Dow Jones Industrial", symbol: "^DJI", price: 38980.40, changePercent: 0.12 }
+      { name: "S&P 500 Index", symbol: "^GSPC", price: "5117.20", changePercent: "0.85%" },
+      { name: "NASDAQ Composite", symbol: "^IXIC", price: "16115.10", changePercent: "1.24%" },
+      { name: "Dow Jones Industrial", symbol: "^DJI", price: "38980.40", changePercent: "0.12%" }
     ];
 
     if (yahooFinanceEngine && typeof yahooFinanceEngine.quote === "function") {
@@ -152,10 +151,10 @@ app.get("/api/market-summary", async (req, res) => {
       const quotes = await yahooFinanceEngine.quote(symbols).catch(() => []);
       if (quotes && quotes.length > 0) {
         majorIndices = quotes.map((q: any) => ({
-          name: q.shortName || q.symbol,
-          symbol: q.symbol,
-          price: q.regularMarketPrice || 0,
-          changePercent: q.regularMarketChangePercent || 0
+          name: (q.shortName || q.symbol || "").toString(),
+          symbol: (q.symbol || "").toString(),
+          price: (q.regularMarketPrice || 0).toString(),
+          changePercent: `${(q.regularMarketChangePercent || 0).toFixed(2)}%`
         }));
       }
     }
