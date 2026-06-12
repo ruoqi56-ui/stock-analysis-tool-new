@@ -2,25 +2,31 @@ import express from "express";
 import path from "path";
 import dotenv from "dotenv";
 import { createServer as createViteServer } from "vite";
+// Import Finnhub correctly using ES Module imports
+import finnhub from "finnhub";
 
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = parseInt(process.env.PORT || "3000", 10);
 
 app.use(express.json());
 
-// 🚀 THE PERMANENT FIX: Force Node to load the ESM module bypassing esbuild completely
+// 🚀 Safe runtime wrapper for Yahoo Finance 
 let yahooFinance: any;
 async function loadYahooFinance() {
   try {
-    // This exact syntax tricks esbuild into leaving the import completely alone
     const moduleName = "yahoo-finance2";
     const module = await Function("return import(arguments[0])")(moduleName);
-    yahooFinance = module.default;
-    
+    // Handle either default export wrapper configurations cleanly
+    yahooFinance = module.default?.default || module.default || module;
+    console.log("Yahoo Finance module loaded successfully.");
+  } catch (err) {
+    console.error("Critical: Failed to load Yahoo Finance dynamically:", err);
+  }
+}
+
 // Initialize Finnhub Client safely
-const finnhub = require('finnhub');
 const finnhubApiClient = finnhub.ApiClient.instance;
 const api_key = finnhubApiClient.authentications['api_key'];
 api_key.apiKey = process.env.FINNHUB_API_KEY; 
@@ -28,7 +34,7 @@ const finnhubClient = new finnhub.DefaultApi();
 
 const getFinnhubQuote = (symbol: string): Promise<any> => {
   return new Promise((resolve, reject) => {
-    finnhubClient.quote(symbol, (error: any, data: any, response: any) => {
+    finnhubClient.quote(symbol, (error: any, data: any) => {
       if (error) reject(error);
       else resolve(data);
     });
@@ -37,7 +43,7 @@ const getFinnhubQuote = (symbol: string): Promise<any> => {
 
 const getFinnhubRecommendations = (symbol: string): Promise<any[]> => {
   return new Promise((resolve, reject) => {
-    finnhubClient.recommendationTrends(symbol, (error: any, data: any, response: any) => {
+    finnhubClient.recommendationTrends(symbol, (error: any, data: any) => {
       if (error) reject(error);
       else resolve(data);
     });
@@ -148,7 +154,7 @@ app.get("/api/market-summary", async (req, res) => {
 
 // Bootstrap application sequentially
 async function bootstrap() {
-  // Resolve ESM Module path directly at runtime avoiding bundle rewrites
+  // Safe asynchronous initialization
   await loadYahooFinance();
 
   if (process.env.NODE_ENV !== "production") {
